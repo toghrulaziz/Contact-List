@@ -1,0 +1,296 @@
+#include <iostream>
+#include <conio.h>
+#include <Windows.h>
+using namespace std;
+
+
+struct Person
+{
+	char* name = new char[20];
+	char* surname = new char[20];
+	char* phoneNumber = new char[15];
+	int age;
+
+	Person() {}
+
+	Person(const char* n, const char* s, const char* p, int a) {
+		strcpy_s(name, strlen(n) + 1, n);
+		strcpy_s(surname, strlen(s) + 1, s);
+		strcpy_s(phoneNumber, strlen(p) + 1, p);
+		age = a;
+	}
+
+
+	void CopyPerson(Person* ps) {
+		strcpy_s(name, strlen(ps->name) + 1, ps->name);
+		strcpy_s(surname, strlen(ps->surname) + 1, ps->surname);
+		strcpy_s(phoneNumber, strlen(ps->phoneNumber) + 1, ps->phoneNumber);
+		age = ps->age;
+	}
+
+
+	void Print() {
+		cout << name << " " << surname << endl;
+	}
+
+	void PrintPerson() {
+		cout << "Name: " << name << endl << "Surname: " << surname << endl << "Number: " << phoneNumber << endl << "Age: " << age << endl;
+	}
+
+
+	void deleteFile() {
+		FILE* f;
+		fopen_s(&f, "people.txt", "w");
+		fclose(f);
+	}
+
+	void showContactsFile() {
+		FILE* f;
+		fopen_s(&f, "people.txt", "r");
+		int n = 0;
+		char* bf = new char[100]{};
+		while (fgets(bf, 100, f) != nullptr) {
+			cout << n + 1 << "." << bf;
+			n++;
+		}
+		delete[] bf;
+		fclose(f);
+
+	}
+
+
+	void WritetoFile() {
+		FILE* f;
+		fopen_s(&f, "people.txt", "a");
+
+		fputs(name, f);
+		fputs(" ", f);
+		fputs(surname, f);
+		fputs(",", f);
+		fputs(phoneNumber, f);
+		fputs(",", f);
+		char* asciiAge = new char[4]{};
+		_itoa_s(age, asciiAge, 4, 10);
+		fputs(asciiAge, f);
+		fputs("\n", f);
+		fclose(f);
+		delete[] asciiAge;
+
+	}
+
+
+
+	~Person() {
+		delete[] name;
+		delete[] surname;
+		delete[] phoneNumber;
+	}
+
+
+};
+
+
+void showContacts(int);
+void showContact(Person*, int);
+void mainMenu(int);
+void writeToFile(Person*, int);
+
+
+
+void deleteContact(int choose, int size) {
+	system("cls");
+	
+	FILE* f;
+	fopen_s(&f, "people.txt", "r");
+	int n = 0;
+	char* bf = new char[100]{};
+	char* trash = new char[100]{};
+	int i = 0;
+	for (i = 0; i < choose - 1; i++) {
+		fgets(bf, 100, f);
+		cout << bf;
+	}
+	for (i; i < choose; i++) {
+		fgets(trash, 100, f);
+	}
+	for (i; i < size; i++) {
+		fgets(bf, 100, f);
+		cout << bf;
+	}
+
+	cout << "\n\n" << "Contact deleted!" << endl;
+
+	cout << "b.Back" << endl;
+	while (true) {
+		char choose;
+		choose = _getch();
+		if ((int)choose == 66 || (int)choose == 98) {
+			showContacts(size);
+		}
+	}
+
+	delete[] bf;
+
+	fclose(f);
+	
+	
+
+
+}
+
+
+void writeToFile(Person* People, int size) {
+	People->deleteFile();
+	for (int i = 0; i < size; i++) {
+		People[i].WritetoFile();
+	}
+}
+
+void addToFile(Person* People, int size) {
+	People[size - 1].WritetoFile();
+}
+
+
+
+// Butun Kontactlar
+void showContacts(int size) {
+
+	system("cls");
+	
+
+	FILE* f;
+	fopen_s(&f, "people.txt", "r");
+	int n = 0;
+	char* bf = new char[100]{};
+	for (int i = 0; i < size; i++) {
+		fgets(bf, 100, f);
+		cout << n + 1 << "." << bf;
+		n++;
+
+	}
+	cout << "b.Back" << endl;
+	cout << "d.Delete" << endl;
+	while (true) {
+		char choose;
+		choose = _getch();
+		if ((int)choose == 66 || (int)choose == 98) {
+			mainMenu(size);
+		}
+		else if ((int)choose == 68 || (int)choose == 100) {
+			int sechim;
+			cout << "Add the index you want delete: ",cin >> sechim;
+			deleteContact(sechim,size);
+		};
+	}
+
+	delete[] bf;
+	fclose(f);
+
+
+
+
+
+}
+
+
+
+void addPerson(Person*& People, int& size, Person* ps) {
+	system("cls");
+	Person* temp = new Person[size + 1];
+
+
+	for (int i = 0; i < size; i++) {
+		temp[i].CopyPerson(People + i);
+	}
+
+	temp[size].CopyPerson(ps);
+
+	temp[size].PrintPerson();
+	cout << "\n\n";
+
+	delete[] People;
+	People = temp;
+	size++;
+	temp = nullptr;
+
+	
+	addToFile(People, size);
+	cout << "New Contact Added!" << endl;
+	cout << "b.Back" << endl;
+	while (true) {
+		char choose;
+		choose = _getch();
+		if ((int)choose == 98 || (int)choose == 66) {
+			mainMenu(size);
+		};
+
+	}
+
+
+}
+
+
+
+
+// Esas Menyu 
+void mainMenu(int size) {
+	Person* People = new Person[size]{
+			Person{new char[] {"Toghrul"},new char[] {"Azizli"},new char[] {"773780123"},18},
+			Person{new char[] {"Addilyn"},new char[] {"Pearle"},new char[] {"773780124"},19},
+			Person{new char[] {"Brittani"},new char[] {"Jesse"},new char[] {"773780125"},20},
+			Person{new char[] {"Kellen"},new char[] {"Wyatt"},new char[] {"773780126"},21},
+			Person{new char[] {"Colt"},new char[] {"Bradley"},new char[] {"773780127"},22},
+	};
+	system("cls");
+	cout << "Contact List\n\n";
+	cout << "1. All Contacts\n" << "2. Add Contact\n" << "3. Search\n" << "4. Exit\n\n";
+	
+
+	while (true) {
+		char choose;
+		choose = _getch();
+		if ((int)choose == 49) {
+				showContacts(size);
+		}
+		else if ((int)choose == 50) {
+			cout << "ss" << endl;
+
+			Person* ps = new Person;
+			ps->name = new char[20];
+			ps->surname = new char[20];
+			ps->phoneNumber = new char[20];
+			ps->age = 0;
+			cout << "Add Name: "; cin.getline(ps->name, 20);
+			cout << "Add Surname: ";  cin.getline(ps->surname, 20);
+			cout << "Add Phone Number: "; cin.getline(ps->phoneNumber, 20);
+			cout << "Add Age: "; cin >> ps->age;
+
+
+			addPerson(People, size, ps);
+
+
+		}
+		else if ((int)choose == 52) {
+			break;
+		}
+	}
+}
+
+
+
+
+void main() {
+	int size = 5;
+	
+	Person* People = new Person[size]{
+			Person{new char[] {"Toghrul"},new char[] {"Azizli"},new char[] {"773780123"},18},
+			Person{new char[] {"Addilyn"},new char[] {"Pearle"},new char[] {"773780124"},19},
+			Person{new char[] {"Brittani"},new char[] {"Jesse"},new char[] {"773780125"},20},
+			Person{new char[] {"Kellen"},new char[] {"Wyatt"},new char[] {"773780126"},21},
+			Person{new char[] {"Colt"},new char[] {"Bradley"},new char[] {"773780127"},22},
+	};
+	writeToFile(People, size);
+	mainMenu(size);
+
+
+}
